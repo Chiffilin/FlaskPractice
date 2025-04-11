@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 from flask import Flask, jsonify, request
 
 from database.main import add_new_note, init_db, get_all_notes, delete_notes, update_note
@@ -19,7 +21,7 @@ init_db()
 def create_notes():
     data = request.get_json()
     result = add_new_note(data["text"])
-    return jsonify(result), 201
+    return jsonify(result), HTTPStatus.CREATED
 
 @app.route("/notes", methods = ["GET"])
 def get_all_notes_from_db():
@@ -29,13 +31,18 @@ def get_all_notes_from_db():
 @app.route("/notes/<int:note_id>", methods=["DELETE"])
 def remove_note(note_id):
     delete_notes(note_id)
-    return "", 204
+    return "", HTTPStatus.NO_CONTENT
 
-@app.route("/notes/<int:note_id>",methods = ["PUT"])
+@app.route("/notes/<int:note_id>", methods=["PUT"])
 def update_note_in_db(note_id):
     data = request.get_json()
-    update_note(note_id,data["text"])
-    return jsonify({"error": f"Note {note_id} not found"}), 404
+    result = update_note(note_id, data["text"])
+
+    if result == "Note doesn't found":
+        return jsonify({"error": f"Note {note_id} not found"}), HTTPStatus.NOT_FOUND
+    else:
+        return jsonify({"message": result}), HTTPStatus.OK
+
 
 if __name__ == "__main__":
     app.run(debug=True)

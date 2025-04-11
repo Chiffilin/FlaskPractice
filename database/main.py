@@ -1,6 +1,6 @@
 import sqlite3
 
-DB_STORAGE = "database/"
+DB_STORAGE = "storage/"
 DB_NAME = f"{DB_STORAGE}notes.db"
 
 def connect():
@@ -51,19 +51,19 @@ def add_new_note(text:str):
     conn.commit()
     note_id = cursor.lastrowid
     conn.close()
-    print(text)
     return {"id": note_id, "text": text}
 
-def update_note(note_id: int, new_text: str):
+def update_note(note_id: int, new_text: str) -> str:
     if note_exists(note_id):
         conn = connect()
         cursor = conn.cursor()
         cursor.execute("UPDATE notes SET text = ? WHERE id = ?", (new_text, note_id))
         conn.commit()
         conn.close()
-        return f"The note{note_id} has been updated"
+        return f"The note {note_id} has been updated"
     else:
-        return "Note doesn't found"
+        return "Note not found"
+
 
 def delete_notes(note_id:int):
     conn = connect()
